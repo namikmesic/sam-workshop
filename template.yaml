@@ -40,6 +40,7 @@ Resources:
       Environment:
         Variables:
           USERS_TABLE: !Ref UsersDynamoDBTable
+          IS_OFFLINE: 'false'
       Events:
         Event1:
           Type: Api

@@ -7,8 +7,21 @@ const app = express()
 const AWS = require('aws-sdk');
 
 
-const USERS_TABLE = process.env.USERS_TABLE;
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const USERS_TABLE = 'users';
+const IS_OFFLINE = 'true';
+
+
+let dynamoDb;
+
+if (IS_OFFLINE === 'true') {
+  dynamoDb = new AWS.DynamoDB.DocumentClient({
+    endpoint: 'http://dynamodb:8000'
+  })
+  console.log(dynamoDb);
+  
+} else {
+  dynamoDb = new AWS.DynamoDB.DocumentClient();
+};
 
 app.use(bodyParser.json({ strict: false }));
 
@@ -55,6 +68,9 @@ app.post('/users', function (req, res) {
       name: name,
     },
   };
+
+  console.log('here we go')
+  console.log(params)
 
   dynamoDb.put(params, (error) => {
     if (error) {
