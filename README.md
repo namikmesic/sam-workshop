@@ -6,6 +6,8 @@
 - Add proper IAM permissions to your lambda function
 - Pass the table name as environment var, so it's unique for each deployment stage
 - Pass the stage name as environment var for the same reasons
+- Set path specific routing for different api calls (Dedicated API endpoint)
+- Discuss benefits and downsides of each approach
 
 ## Step 1 - Check updates we made
 - Check `template.yml` file compared to Part 1
