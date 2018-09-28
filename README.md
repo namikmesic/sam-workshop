@@ -1,46 +1,23 @@
-# Serverless Workshop Part 1 - sam
+# Serverless Workshop Part 2 - sam
 
 ## Objectives
-- Install and configure sam cli
-- Deploy simple application and check your AWS cloudformation stacks to see result
-- Test your application
+- Add dynamo db table with REST-like endpoints
+- Create few endpoints (Create & List users)
+- Add proper IAM permissions to your lambda function
+- Pass the table name as environment var, so it's unique for each deployment stage
+- Pass the stage name as environment var for the same reasons
 
-#### Step 1 - Set up Environment
-- Install and configure [python and pip](https://docs.docker.com/docker-for-mac/install/)
-- Install [docker for mac](https://docs.docker.com/docker-for-mac/)
+## Step 1 - Check updates we made
+- Check `template.yml` file compared to Part 1
+- Check `index.js` function compared to Part 1
 
-
-#### Step 2 - Install and configure sam
-Install and setup virtualenv
+## Step 2 - Re-deploy your application
+Install dependencies
 ```bash
-pip install virtualenv
-virtualenv sam-workshop
-source sam-workshop/bin/activate
-```
-Install aws cli
-```bash
-pip install awscli
-# Now configure your aws with your dev credentials
-aws configure
-```
-Finally Install and configure [sam](https://github.com/awslabs/aws-sam-cli/blob/develop/docs/installation.rst)
-
-```bash
-pip install aws-sam-cli
+npm install
+npm install --save aws-sdk body-parser
 ```
 
-#### Step 3 - Deploy your application
-Innitialise app and install dependencies
-```bash
-npm init -f
-npm install --save express serverless-http
-```
-Create an s3 bucket
-```bash
-aws s3 mb s3://<your-bucket-name> --region <region-name>
-export BUCKET_NAME='s3://<your-bucket-name>'
-
-```
 Package and upload your app to s3
 ```bash
 sam package \
@@ -57,8 +34,11 @@ sam deploy \
     --capabilities CAPABILITY_IAM
 ```
 
-## Step 4 - Test your application
+## Step 3 - Test the new functionality
 ```bash
-export BASE_DOMAIN=<your-base-domain-endpoint>
-curl $BASE_DOMAIN
+export BASE_DOMAIN=<your-dev-endpoint>
+# Create user
+curl -H "Content-Type: application/json" -X POST ${BASE_DOMAIN}/users -d '{"userId": "alexdebrie1", "name": "Alex DeBrie"}'
+# List user
+curl -H "Content-Type: application/json" -X GET ${BASE_DOMAIN}/users/alexdebrie1
 ```

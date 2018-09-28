@@ -2,6 +2,18 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 Description: 'SAM template for Serverless framework service: '
 Resources:
+  UsersDynamoDBTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
   App:
     Type: 'AWS::Serverless::Function'
     Properties:
@@ -10,6 +22,24 @@ Resources:
       CodeUri: .
       MemorySize: 128
       Timeout: 3
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'dynamodb:Query'
+                - 'dynamodb:Scan'
+                - 'dynamodb:GetItem'
+                - 'dynamodb:PutItem'
+                - 'dynamodb:UpdateItem'
+                - 'dynamodb:DeleteItem'
+              Resource:
+                - 'Fn::GetAtt':
+                    - UsersDynamoDBTable
+                    - Arn
+      Environment:
+        Variables:
+          USERS_TABLE: !Ref UsersDynamoDBTable
       Events:
         Event1:
           Type: Api
@@ -53,6 +83,22 @@ Resources:
                   'Fn::Sub': >-
                     arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${App.Arn}/invocations
               responses: {}
+          /users:
+            post:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  'Fn::Sub': >-
+                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${App.Arn}/invocations
+          "/users/{proxy+}":
+            post:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  'Fn::Sub': >-
+                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${App.Arn}/invocations
   AppLambdaPermission:
     Type: 'AWS::Lambda::Permission'
     DependsOn:
@@ -62,8 +108,10 @@ Resources:
       FunctionName:
         Ref: App
       Principal: apigateway.amazonaws.com
-
 Outputs:
-    ApiURL:
+    BaseDomain:
       Description: "API endpoint URL for environment"
       Value: !Sub "https://${MyExpressApplication}.execute-api.${AWS::Region}.amazonaws.com/api"
+    UsersTable:
+      Description: "Database used by the application"
+      Value: !Sub "${UsersDynamoDBTable}"
