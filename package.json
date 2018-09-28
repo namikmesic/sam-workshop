@@ -1,0 +1,20 @@
+{
+  "name": "my-express-application-sam",
+  "version": "1.0.0",
+  "description": "## Objectives - Install and configure sam cli - Deploy simple application and check your AWS cloudformation stacks to see result - Test your application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@sbp.gitlab.schubergphilis.com:2228/nmesic/my-express-application-sam.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.3",
+    "serverless-http": "^1.6.0"
+  }
+}
