@@ -15,9 +15,55 @@ Resources:
           Type: Api
           Properties:
             Path: /
-            Method: ANY
+            Method: GET
+            RestApiId:
+              Ref: MyExpressApplication
         Event2:
           Type: Api
           Properties:
             Path: '/{proxy+}'
-            Method: ANY
+            Method: GET
+            RestApiId:
+              Ref: MyExpressApplication
+  MyExpressApplication:
+    Type: 'AWS::Serverless::Api'
+    Properties:
+      StageName: api
+      DefinitionBody:
+        swagger: '2.0'
+        info:
+          title:
+            Ref: 'AWS::StackName'
+        paths:
+          /:
+            get:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  'Fn::Sub': >-
+                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${App.Arn}/invocations
+              responses: {}
+          '/{proxy+}':
+            get:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  'Fn::Sub': >-
+                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${App.Arn}/invocations
+              responses: {}
+  AppLambdaPermission:
+    Type: 'AWS::Lambda::Permission'
+    DependsOn:
+      - App
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName:
+        Ref: App
+      Principal: apigateway.amazonaws.com
+
+Outputs:
+    ApiURL:
+      Description: "API endpoint URL for environment"
+      Value: !Sub "https://${MyExpressApplication}.execute-api.${AWS::Region}.amazonaws.com/api"
