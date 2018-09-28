@@ -1,0 +1,6 @@
+{
+  "App": {
+    "USERS_TABLE": "users",
+    "IS_OFFLINE": "true"
+  }
+}
