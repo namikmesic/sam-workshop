@@ -3,7 +3,8 @@
 ## Objectives
 - Split App into multiple functions
 - Understand how to protect your api with API key - [OpenIssue](https://github.com/awslabs/serverless-application-model/issues/49)
-- Add simple cicd pipeline for gitlab
+- Add simple api key auth against your gateway - [OpenIssue](https://github.com/awslabs/serverless-application-model/issues/547)
+- Add simple cicd pipeline for gitlab - Currently broken as I don't have image with node and python combined (npm package for aws-sam-local is broken)
 
 ## Step 1 - Check updates we made
 - Check `template.yaml` file and check changes we made
