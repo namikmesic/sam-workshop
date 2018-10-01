@@ -9,7 +9,7 @@ stages:
   - deploy
 
 before_script:
-  - npm install -g serverless express serverless-http aws-sdk body-parser aws-sam-local
+  - npm install -g serverless express serverless-http aws-sdk body-parser
 
 deploy_acceptance:
   variables:
@@ -23,3 +23,21 @@ deploy_acceptance:
    - npm install
    - sam package --template-file template.yaml --output-template-file my-express-app.yaml --s3-bucket $BUCKET_NAME
    - sam deploy --template-file my-express-app.yaml --stack-name $STAGE --capabilities CAPABILITY_IAM
+
+
+deploy_prod:
+  variables:
+    AWS_ACCESS_KEY_ID: $_AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $_AWS_SECRET_ACCESS_KEY
+    AWS_DEFAULT_REGION: $_AWS_DEFAULT_REGION
+    STAGE: prod
+    BUCKET_NAME: express-app-sam-namik
+  stage: deploy
+  script:
+   - npm install
+   - sam package --template-file template.yaml --output-template-file my-express-app.yaml --s3-bucket $BUCKET_NAME
+   - sam deploy --template-file my-express-app.yaml --stack-name $STAGE --capabilities CAPABILITY_IAM
+  when: manual
+  only:
+    - master
+  allow_failure: false
