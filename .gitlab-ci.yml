@@ -16,7 +16,7 @@ deploy_acceptance:
     AWS_ACCESS_KEY_ID: $_AWS_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $_AWS_SECRET_ACCESS_KEY
     AWS_DEFAULT_REGION: $_AWS_DEFAULT_REGION
-    STAGE: $_STAGE
+    STAGE: acc
     BUCKET_NAME: express-app-sam-namik
   stage: deploy
   script:
