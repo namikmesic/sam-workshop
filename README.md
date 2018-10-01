@@ -3,7 +3,7 @@
 ## Objectives
 - Split App into multiple functions
 - Understand how to protect your api with API key - [OpenIssue](https://github.com/awslabs/serverless-application-model/issues/49)
-- Understand different ways of protecting your API endpoints
+- Add simple cicd pipeline for gitlab
 
 ## Step 1 - Check updates we made
 - Check `template.yaml` file and check changes we made
