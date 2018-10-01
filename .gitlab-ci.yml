@@ -1,4 +1,4 @@
-image: node:8.12.0
+image: alpine:3.8
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
@@ -9,7 +9,9 @@ stages:
   - deploy
 
 before_script:
-  - npm install -g serverless express serverless-http aws-sdk body-parser
+  - apk add --updte nodejs nodejs-npm python python-dev py-pip build-base
+  - pip install awscli
+  - pip install aws-sam-cli
 
 deploy_acceptance:
   variables:
