@@ -56,6 +56,7 @@ Resources:
             Method: GET
             RestApiId:
               Ref: MyExpressApplication
+
   MyExpressApplication:
     Type: 'AWS::Serverless::Api'
     Properties:
@@ -84,6 +85,15 @@ Resources:
                   'Fn::Sub': >-
                     arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${App.Arn}/invocations
               responses: {}
+          '/users/{proxy+}':
+            get:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  'Fn::Sub': >-
+                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetUser.Arn}/invocations
+              responses: {}
           /users:
             post:
               x-amazon-apigateway-integration:
@@ -91,15 +101,8 @@ Resources:
                 type: aws_proxy
                 uri:
                   'Fn::Sub': >-
-                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${App.Arn}/invocations
-          "/users/{proxy+}":
-            post:
-              x-amazon-apigateway-integration:
-                httpMethod: POST
-                type: aws_proxy
-                uri:
-                  'Fn::Sub': >-
-                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${App.Arn}/invocations
+                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateUser.Arn}/invocations
+              responses: {}
   AppLambdaPermission:
     Type: 'AWS::Lambda::Permission'
     DependsOn:
@@ -108,6 +111,94 @@ Resources:
       Action: 'lambda:InvokeFunction'
       FunctionName:
         Ref: App
+      Principal: apigateway.amazonaws.com
+  GetUser:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs6.10
+      CodeUri: .
+      MemorySize: 128
+      Timeout: 3
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'dynamodb:Query'
+                - 'dynamodb:Scan'
+                - 'dynamodb:GetItem'
+                - 'dynamodb:PutItem'
+                - 'dynamodb:UpdateItem'
+                - 'dynamodb:DeleteItem'
+              Resource:
+                - 'Fn::GetAtt':
+                    - UsersDynamoDBTable
+                    - Arn
+      Environment:
+        Variables:
+          USERS_TABLE: !Ref UsersDynamoDBTable
+          IS_OFFLINE: 'false'
+      Events:
+        Event1:
+          Type: Api
+          Properties:
+            Path: '/users/{proxy+}'
+            Method: GET
+            RestApiId:
+              Ref: MyExpressApplication
+  GetUserLambdaPermission:
+    Type: 'AWS::Lambda::Permission'
+    DependsOn:
+      - GetUser
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName:
+        Ref: GetUser
+      Principal: apigateway.amazonaws.com
+  CreateUser:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs6.10
+      CodeUri: .
+      MemorySize: 128
+      Timeout: 3
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'dynamodb:Query'
+                - 'dynamodb:Scan'
+                - 'dynamodb:GetItem'
+                - 'dynamodb:PutItem'
+                - 'dynamodb:UpdateItem'
+                - 'dynamodb:DeleteItem'
+              Resource:
+                - 'Fn::GetAtt':
+                    - UsersDynamoDBTable
+                    - Arn
+      Environment:
+        Variables:
+          USERS_TABLE: !Ref UsersDynamoDBTable
+          IS_OFFLINE: 'false'
+      Events:
+        Event1:
+          Type: Api
+          Properties:
+            Path: /users
+            Method: post
+            RestApiId:
+              Ref: MyExpressApplication
+  CreateUserLambdaPermission:
+    Type: 'AWS::Lambda::Permission'
+    DependsOn:
+      - CreateUser
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName:
+        Ref: CreateUser
       Principal: apigateway.amazonaws.com
 Outputs:
     BaseDomain:

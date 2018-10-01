@@ -1,57 +1,37 @@
 # Serverless Workshop Part 3 - sam
 
 ## Objectives
-- Invoke your function locally with provided event
-- Start local api gateway with sam
-- Start local instance of dynamodb with docker
-- Understand how networking works
-- Understand how environmental variables work
-- - Understand how to read and check changes made to local db and some additional features.
-
-
+- Split App into multiple functions
+- Understand how to protect your api with API key - [OpenIssue](https://github.com/awslabs/serverless-application-model/issues/49)
+- Understand different ways of protecting your API endpoints
 
 ## Step 1 - Check updates we made
-- Check changes we made to `index.js` to support local dynamodb
+- Check `template.yaml` file and check changes we made
 
 
-## Step 2 - Start testing your application locally
-First create a docker network
+## Step 2 - Re-deploy your application with updated config
+Package app
 ```bash
-docker network create sam-demo
-```
-Now set up and start dynamodb locally
-```bash
-docker run -d -v "$PWD":/dynamodb_local_db -p 8000:8000 --network sam-demo --name dynamodb cnadiminti/dynamodb-local
-```
-Now bootstrap your dynamodb with test table `users`
-```bash
-sh bootstrap_dynamodb.sh
+sam package \
+    --template-file template.yaml \
+    --output-template-file my-express-app.yaml \
+    --s3-bucket $BUCKET_NAME
 ```
 
-Lets try starting the api offline
+Deploy your application
+
 ```bash
-sam local start-api --docker-network sam-demo
+export STAGE='<your-name>-sam'
+sam deploy \
+    --template-file my-express-app.yaml \
+    --stack-name $STAGE \
+    --capabilities CAPABILITY_IAM
 ```
-
-## Step 3 - Test your application locally
-
-Try and invoke one of your functions locally
+### Step 3 - Test the new functionality
 ```bash
-sam local invoke "App" --env-vars environment.json -e test_events/create_user.json  --docker-network sam-demo
-
-```
-Check if hello world works
-```bash
-curl http://localhost:3000
-```
-
-Check if you can create user locally
-```bash
-curl -H "Content-Type: application/json" -X POST http://localhost:3000/users -d '{"userId": "alexdebrie1", "name": "Alex DeBrie"}'
-```
-
-Now see if there are records in Database
-```bash
-aws dynamodb scan --table-name users --endpoint-url http://localhost:8000
-
+export BASE_DOMAIN=<your-dev-endpoint>
+# Create user
+curl -H "Content-Type: application/json" -X POST ${BASE_DOMAIN}/users -d '{"userId": "alexdebrie1", "name": "Alex DeBrie"}'
+# List user
+curl -H "Content-Type: application/json" -X GET ${BASE_DOMAIN}/users/alexdebrie1
 ```
